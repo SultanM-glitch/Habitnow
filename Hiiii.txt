@@ -1,0 +1,39 @@
+Habit Tracker Pro :root{ --bg:#0b0e1a;--card:#171a2e;--accent:#7c7cff;--ok:#4ade80;--text:#e5e7eb;--muted:#9ca3af;--danger:#ef4444; } .light{ --bg:#f4f6fb;--card:#ffffff;--accent:#6366f1;--ok:#22c55e;--text:#0f172a;--muted:#475569; } *{box-sizing:border-box} body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)} header{padding:14px 16px;position:sticky;top:0;background:var(--bg);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1f2340} header h1{margin:0;font-size:18px} header button{background:var(--accent);border:none;border-radius:10px;padding:8px 12px;color:#fff;font-weight:600} main{padding:16px 16px 90px} .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px} .stat{background:var(--card);border-radius:14px;padding:10px;text-align:center} .stat .n{font-size:18px;font-weight:700} .stat .l{font-size:11px;color:var(--muted)} .habit{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;display:flex;gap:12px;align-items:center} .check{width:28px;height:28px;border-radius:50%;border:2px solid #3b3f7a;display:grid;place-items:center} .check.done{background:var(--ok);border-color:var(--ok)} .check.done::after{content:'✓';color:#052e16;font-weight:900} .info{flex:1} .title{font-weight:700} .meta{font-size:12px;color:var(--muted)} .streak{font-size:12px;color:#a5b4fc} .tag{font-size:11px;padding:2px 6px;border-radius:6px;background:#232760;display:inline-block;margin-top:4px} .actions{display:flex;gap:6px} .actions button{border:none;border-radius:10px;padding:6px 8px;background:#232760;color:#fff} .del{background:#3b1d2a} .fab{position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;background:var(--accent);border:none;color:#fff;font-size:26px;font-weight:700} footer{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg);border-top:1px solid #1f2340} footer button{background:transparent;border:none;color:var(--muted);padding:12px} footer button.active{color:var(--accent)} .overlay{position:fixed;inset:0;background:#0008;display:none} .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--card);width:92%;max-width:420px;border-radius:18px;padding:16px;display:none} .modal h2{margin:6px 0 10px} .modal input,.modal select{width:100%;padding:12px;margin-bottom:10px;border-radius:12px;border:1px solid #24286b;background:transparent;color:var(--text)} .row{display:grid;grid-template-columns:1fr 1fr;gap:8px} .modal button{width:100%;padding:12px;border:none;border-radius:12px;font-weight:700} .save{background:var(--accent)} .cancel{background:#2a2f6b;margin-top:6px} .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px} .day{background:#14174a;border-radius:8px;padding:8px;text-align:center;font-size:12px} .day.done{background:var(--ok);color:#052e16} .setting{background:var(--card);padding:14px;border-radius:14px;margin-bottom:10px} .setting button{margin-top:8px;width:100%;padding:10px;border:none;border-radius:10px;background:var(--accent);color:#fff} 
+
+Habit Tracker Pro
+
+Add 
+
+0
+
+Today
+
+0%
+
+Rate
+
+0
+
+Best
+
+0
+
+Habits
+
+Per-habit statistics coming next.
+
+ThemeToggle Light / Dark
+
+BackupExport JSON
+
+Restore
+
++
+
+Habit
+
+DailyWeekly 
+
+Save Cancel 
+
+Home Calendar Stats Settings const KEY='habits_pro_v3'; const THEME_KEY='theme_v1'; let habits=JSON.parse(localStorage.getItem(KEY)||'[]'); let editId=null; if(localStorage.getItem(THEME_KEY)==='light')document.body.classList.add('light'); const today=()=>new Date().toISOString().slice(0,10); function save(){localStorage.setItem(KEY,JSON.stringify(habits));render();} function openModal(h=null){overlay.style.display=modal.style.display='block';if(h){editId=h.id;hName.value=h.name;hFreq.value=h.freq;hGoal.value=h.goal;hTag.value=h.tag||'';modalTitle.textContent='Edit Habit'}else{editId=null;modalTitle.textContent='New Habit'}} function closeModal(){overlay.style.display=modal.style.display='none';hName.value='';hTag.value=''} function saveHabit(){if(!hName.value.trim())return;if(editId){const h=habits.find(x=>x.id===editId);Object.assign(h,{name:hName.value,freq:hFreq.value,goal:+hGoal.value,tag:hTag.value});}else{habits.push({id:Date.now(),name:hName.value,freq:hFreq.value,goal:+hGoal.value,tag:hTag.value,done:{},best:0});}closeModal();save();} function toggle(id){const h=habits.find(x=>x.id===id);const t=today();h.done[t]=!h.done[t];calcStreak(h);save();} function calcStreak(h){let s=0,b=0;Object.keys(h.done).sort().forEach(d=>{if(h.done[d]){s++;b=Math.max(b,s)}else s=0});h.best=b} function del(id){habits=habits.filter(h=>h.id!==id);save();} function render(){habitList.innerHTML='';let done=0,all=habits.length;habits.forEach(h=>{if(h.done[today()])done++;const d=document.createElement('div');d.className='habit';d.innerHTML=`<div class="check ${h.done[today()]?'done':''}" onclick="toggle(${h.id})"></div><div class="info"><div class="title">${h.name}</div><div class="meta">${h.freq} • goal ${h.goal}</div>${h.tag?`<div class=tag>${h.tag}</div>`:''}<div class="streak">🔥 Best ${h.best}</div></div><div class="actions"><button onclick='openModal(${JSON.stringify(h)})'>✎</button><button class="del" onclick="del(${h.id})">✕</button></div>`;habitList.appendChild(d)}); sToday.textContent=done;sRate.textContent=all?Math.round(done/all*100)+'%':'0%';sBest.textContent=Math.max(0,...habits.map(h=>h.best));sTotal.textContent=habits.length;renderCalendar();} function renderCalendar(){cal.innerHTML='';for(let i=0;i<30;i++){const d=new Date();d.setDate(d.getDate()-i);const k=d.toISOString().slice(0,10);const el=document.createElement('div');el.className='day';if(habits.some(h=>h.done[k]))el.classList.add('done');el.textContent=d.getDate();cal.appendChild(el)}} function nav(id,b){document.querySelectorAll('main').forEach(m=>m.style.display='none');document.getElementById(id).style.display='block';document.querySelectorAll('footer button').forEach(x=>x.classList.remove('active'));b.classList.add('active')} function toggleTheme(){document.body.classList.toggle('light');localStorage.setItem(THEME_KEY,document.body.classList.contains('light')?'light':'dark')} function exportData(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(habits)],{type:'application/json'}));a.download='habits-backup.json';a.click()} function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{habits=JSON.parse(r.result);save()};r.readAsText(f)} render();
